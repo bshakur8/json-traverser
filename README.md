@@ -1,2 +1,2 @@
-# json_traveser
+# json-traveser
 Easy Json Traverser.
