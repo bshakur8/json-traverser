@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+import logging
+
+logger = logging.getLogger(__name__)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+logger.setLevel(logging.INFO)
+
+
 class JsonTraverse:
     """
     Traverse a json dict.
@@ -62,15 +69,18 @@ class JsonTraverse:
                 raise AssertionError(f"Type not supported (yet): {type(collection)}")
 
         # Finished looking - return the last collection or value (str, int, float, etc)
-        return JsonTraverse._check_attribute(collection, attribute, nested_keys)
+        return JsonTraverse._check_attribute(collection, attribute, nested_keys, default)
 
     @staticmethod
-    def _check_attribute(collection, attribute, nested_keys):
+    def _check_attribute(collection, attribute, nested_keys, default):
         if not attribute:
             return collection
         try:
             return next(col for key, value in attribute.items() for col in collection if col[key] == value)
         except StopIteration as e:
+            if not isinstance(default, Exception):
+                logger.info(f"{nested_keys} was not found, using default={default}")
+                return default
             raise JsonTraverse._raise_exception(nested_keys, attribute, e)
 
     @staticmethod
